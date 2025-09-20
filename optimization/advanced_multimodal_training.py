@@ -408,43 +408,43 @@ class AdvancedMultimodalTrainer:
             train_predictions = []
             train_targets = []
 
-                for batch in tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs}"):
-                    big5 = batch["big5"].to(self.device)
-                    cmi = batch["cmi"].to(self.device)
-                    rppg = batch["rppg"].to(self.device)
-                    voice = batch["voice"].to(self.device)
-                    targets = batch["target"].to(self.device)
+            for batch in tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs}"):
+                big5 = batch["big5"].to(self.device)
+                cmi = batch["cmi"].to(self.device)
+                rppg = batch["rppg"].to(self.device)
+                voice = batch["voice"].to(self.device)
+                targets = batch["target"].to(self.device)
 
-                    optimizer.zero_grad()
-                    outputs, attention_info, dynamic_weights = self.model(
-                        big5, cmi, rppg, voice
-                    )
-                    
-                    # 기본 손실
-                    basic_loss = criterion(outputs.squeeze(), targets)
-                    
-                    # 정규화 손실 (모달리티 가중치 균형)
-                    modality_weights = attention_info['modality_weights']
-                    weight_entropy = -torch.sum(modality_weights * torch.log(modality_weights + 1e-8))
-                    weight_regularization = 0.01 * weight_entropy
-                    
-                    # 중요도 스코어 정규화
-                    importance_scores = attention_info['importance_scores']
-                    importance_regularization = 0.001 * sum(torch.mean(score) for score in importance_scores)
-                    
-                    # 총 손실
-                    total_loss = basic_loss + weight_regularization + importance_regularization
-                    
-                    total_loss.backward()
-                    
-                    # 그래디언트 클리핑
-                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
-                    
-                    optimizer.step()
+                optimizer.zero_grad()
+                outputs, attention_info, dynamic_weights = self.model(
+                    big5, cmi, rppg, voice
+                )
+                
+                # 기본 손실
+                basic_loss = criterion(outputs.squeeze(), targets)
+                
+                # 정규화 손실 (모달리티 가중치 균형)
+                modality_weights = attention_info['modality_weights']
+                weight_entropy = -torch.sum(modality_weights * torch.log(modality_weights + 1e-8))
+                weight_regularization = 0.01 * weight_entropy
+                
+                # 중요도 스코어 정규화
+                importance_scores = attention_info['importance_scores']
+                importance_regularization = 0.001 * sum(torch.mean(score) for score in importance_scores)
+                
+                # 총 손실
+                total_loss = basic_loss + weight_regularization + importance_regularization
+                
+                total_loss.backward()
+                
+                # 그래디언트 클리핑
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
+                
+                optimizer.step()
 
-                    train_loss += total_loss.item()
-                    train_predictions.extend(outputs.squeeze().detach().cpu().numpy())
-                    train_targets.extend(targets.detach().cpu().numpy())
+                train_loss += total_loss.item()
+                train_predictions.extend(outputs.squeeze().detach().cpu().numpy())
+                train_targets.extend(targets.detach().cpu().numpy())
 
             # 검증
             self.model.eval()
@@ -452,20 +452,20 @@ class AdvancedMultimodalTrainer:
             val_predictions = []
             val_targets = []
 
-                with torch.no_grad():
-                    for batch in val_loader:
-                        big5 = batch["big5"].to(self.device)
-                        cmi = batch["cmi"].to(self.device)
-                        rppg = batch["rppg"].to(self.device)
-                        voice = batch["voice"].to(self.device)
-                        targets = batch["target"].to(self.device)
+            with torch.no_grad():
+                for batch in val_loader:
+                    big5 = batch["big5"].to(self.device)
+                    cmi = batch["cmi"].to(self.device)
+                    rppg = batch["rppg"].to(self.device)
+                    voice = batch["voice"].to(self.device)
+                    targets = batch["target"].to(self.device)
 
-                        outputs, attention_info, dynamic_weights = self.model(big5, cmi, rppg, voice)
-                        loss = criterion(outputs.squeeze(), targets)
-                        val_loss += loss.item()
+                    outputs, attention_info, dynamic_weights = self.model(big5, cmi, rppg, voice)
+                    loss = criterion(outputs.squeeze(), targets)
+                    val_loss += loss.item()
 
-                        val_predictions.extend(outputs.squeeze().cpu().numpy())
-                        val_targets.extend(targets.cpu().numpy())
+                    val_predictions.extend(outputs.squeeze().cpu().numpy())
+                    val_targets.extend(targets.cpu().numpy())
 
             # 평균 손실 계산
             train_loss /= len(train_loader)
@@ -536,25 +536,25 @@ class AdvancedMultimodalTrainer:
         attention_weights_list = []
         modality_weights_list = []
 
-            with torch.no_grad():
-                for batch in test_loader:
-                    big5 = batch["big5"].to(self.device)
-                    cmi = batch["cmi"].to(self.device)
-                    rppg = batch["rppg"].to(self.device)
-                    voice = batch["voice"].to(self.device)
-                    targets = batch["target"].to(self.device)
+        with torch.no_grad():
+            for batch in test_loader:
+                big5 = batch["big5"].to(self.device)
+                cmi = batch["cmi"].to(self.device)
+                rppg = batch["rppg"].to(self.device)
+                voice = batch["voice"].to(self.device)
+                targets = batch["target"].to(self.device)
 
-                    outputs, attention_info, dynamic_weights = self.model(
-                        big5, cmi, rppg, voice
-                    )
+                outputs, attention_info, dynamic_weights = self.model(
+                    big5, cmi, rppg, voice
+                )
 
-                    test_predictions.extend(outputs.squeeze().cpu().numpy())
-                    test_targets.extend(targets.cpu().numpy())
-                    
-                    # 어텐션 정보 저장
-                    if attention_info['cross_attention_weights'] is not None:
-                        attention_weights_list.append(attention_info['cross_attention_weights'].cpu().numpy())
-                    modality_weights_list.append(dynamic_weights.cpu().numpy())
+                test_predictions.extend(outputs.squeeze().cpu().numpy())
+                test_targets.extend(targets.cpu().numpy())
+                
+                # 어텐션 정보 저장
+                if attention_info['cross_attention_weights'] is not None:
+                    attention_weights_list.append(attention_info['cross_attention_weights'].cpu().numpy())
+                modality_weights_list.append(dynamic_weights.cpu().numpy())
 
         # 메트릭 계산
         test_predictions = np.array(test_predictions)
