@@ -68,15 +68,23 @@ class MultimodalFusionNet(nn.Module):
         use_cross_attention=True,
     ):
         super(MultimodalFusionNet, self).__init__()
-        
+
         self.use_transformer = use_transformer
         self.use_cross_attention = use_cross_attention
 
         # 각 모달리티별 고급 인코더
-        self.big5_encoder = self._create_advanced_encoder(big5_dim, hidden_dim, dropout_rate)
-        self.cmi_encoder = self._create_advanced_encoder(cmi_dim, hidden_dim // 2, dropout_rate)
-        self.rppg_encoder = self._create_advanced_encoder(rppg_dim, hidden_dim // 2, dropout_rate)
-        self.voice_encoder = self._create_advanced_encoder(voice_dim, hidden_dim // 2, dropout_rate)
+        self.big5_encoder = self._create_advanced_encoder(
+            big5_dim, hidden_dim, dropout_rate
+        )
+        self.cmi_encoder = self._create_advanced_encoder(
+            cmi_dim, hidden_dim // 2, dropout_rate
+        )
+        self.rppg_encoder = self._create_advanced_encoder(
+            rppg_dim, hidden_dim // 2, dropout_rate
+        )
+        self.voice_encoder = self._create_advanced_encoder(
+            voice_dim, hidden_dim // 2, dropout_rate
+        )
 
         # 크로스 어텐션 메커니즘 (모달리티 간 상호작용)
         if use_cross_attention:
@@ -86,7 +94,7 @@ class MultimodalFusionNet(nn.Module):
                 dropout=dropout_rate,
                 batch_first=True,
             )
-            
+
             # 모달리티별 쿼리, 키, 밸류 변환
             self.query_transform = nn.Linear(hidden_dim // 2, hidden_dim // 2)
             self.key_transform = nn.Linear(hidden_dim // 4, hidden_dim // 2)
@@ -99,7 +107,7 @@ class MultimodalFusionNet(nn.Module):
                 nhead=8,
                 dim_feedforward=hidden_dim,
                 dropout=dropout_rate,
-                batch_first=True
+                batch_first=True,
             )
             self.transformer_fusion = nn.TransformerEncoder(encoder_layer, num_layers=2)
 
@@ -123,20 +131,25 @@ class MultimodalFusionNet(nn.Module):
             nn.Linear(hidden_dim // 2, 16),
             nn.ReLU(),
             nn.Linear(16, 4),
-            nn.Softmax(dim=-1)
+            nn.Softmax(dim=-1),
         )
 
         # 모달리티별 중요도 학습
-        self.importance_networks = nn.ModuleList([
-            nn.Sequential(
-                nn.Linear(hidden_dim // 2 if i == 0 else hidden_dim // 4, 32),
-                nn.ReLU(),
-                nn.Linear(32, 1),
-                nn.Sigmoid()
-            ) for i in range(4)
-        ])
+        self.importance_networks = nn.ModuleList(
+            [
+                nn.Sequential(
+                    nn.Linear(hidden_dim // 2 if i == 0 else hidden_dim // 4, 32),
+                    nn.ReLU(),
+                    nn.Linear(32, 1),
+                    nn.Sigmoid(),
+                )
+                for i in range(4)
+            ]
+        )
 
-    def _create_advanced_encoder(self, input_dim: int, output_dim: int, dropout_rate: float) -> nn.Module:
+    def _create_advanced_encoder(
+        self, input_dim: int, output_dim: int, dropout_rate: float
+    ) -> nn.Module:
         """고급 인코더 생성"""
         return nn.Sequential(
             nn.Linear(input_dim, output_dim),
@@ -160,28 +173,28 @@ class MultimodalFusionNet(nn.Module):
         # 모달리티별 중요도 계산
         importance_scores = []
         modalities = [big5_encoded, cmi_encoded, rppg_encoded, voice_encoded]
-        
+
         for i, modality in enumerate(modalities):
             importance = self.importance_networks[i](modality)
             importance_scores.append(importance)
 
         # 동적 가중치 계산
         dynamic_weights = self.weight_gate(big5_encoded)  # Big5를 기준으로 가중치 계산
-        
+
         # 크로스 어텐션 적용 (모달리티 간 상호작용)
         if self.use_cross_attention:
             # Big5를 쿼리로 사용하여 다른 모달리티에 어텐션
             query = self.query_transform(big5_encoded).unsqueeze(1)
-            
+
             # 다른 모달리티들을 키/밸류로 변환
             keys_values = []
             for modality in [cmi_encoded, rppg_encoded, voice_encoded]:
                 key = self.key_transform(modality).unsqueeze(1)
                 value = self.value_transform(modality).unsqueeze(1)
                 keys_values.append(torch.cat([key, value], dim=-1))
-            
+
             key_value = torch.cat(keys_values, dim=1)
-            
+
             attended_features, cross_attention_weights = self.cross_attention(
                 query, key_value, key_value
             )
@@ -193,13 +206,13 @@ class MultimodalFusionNet(nn.Module):
         # 트랜스포머 기반 융합 (선택적)
         if self.use_transformer:
             # 모든 모달리티를 시퀀스로 결합
-            modality_sequence = torch.stack([
-                big5_encoded, cmi_encoded, rppg_encoded, voice_encoded
-            ], dim=1)
-            
+            modality_sequence = torch.stack(
+                [big5_encoded, cmi_encoded, rppg_encoded, voice_encoded], dim=1
+            )
+
             # 트랜스포머로 융합
             transformer_output = self.transformer_fusion(modality_sequence)
-            
+
             # 평균 풀링으로 최종 표현 생성
             transformer_fused = transformer_output.mean(dim=1)
         else:
@@ -207,44 +220,47 @@ class MultimodalFusionNet(nn.Module):
 
         # 적응형 융합
         # 1. 기본 융합 (단순 연결)
-        basic_fused = torch.cat([
-            big5_encoded, cmi_encoded, rppg_encoded, voice_encoded
-        ], dim=1)
-        
+        basic_fused = torch.cat(
+            [big5_encoded, cmi_encoded, rppg_encoded, voice_encoded], dim=1
+        )
+
         # 2. 가중치 기반 융합
         weighted_fused = (
-            dynamic_weights[:, 0:1] * big5_encoded +
-            dynamic_weights[:, 1:2] * cmi_encoded +
-            dynamic_weights[:, 2:3] * rppg_encoded +
-            dynamic_weights[:, 3:4] * voice_encoded
+            dynamic_weights[:, 0:1] * big5_encoded
+            + dynamic_weights[:, 1:2] * cmi_encoded
+            + dynamic_weights[:, 2:3] * rppg_encoded
+            + dynamic_weights[:, 3:4] * voice_encoded
         )
-        
+
         # 3. 중요도 기반 융합
         importance_weighted = (
-            importance_scores[0] * big5_encoded +
-            importance_scores[1] * cmi_encoded +
-            importance_scores[2] * rppg_encoded +
-            importance_scores[3] * voice_encoded
+            importance_scores[0] * big5_encoded
+            + importance_scores[1] * cmi_encoded
+            + importance_scores[2] * rppg_encoded
+            + importance_scores[3] * voice_encoded
         )
 
         # 최종 융합 (여러 융합 방법 결합)
-        final_fused = torch.cat([
-            basic_fused,
-            weighted_fused,
-            importance_weighted,
-            attended_features,
-            transformer_fused
-        ], dim=1)
+        final_fused = torch.cat(
+            [
+                basic_fused,
+                weighted_fused,
+                importance_weighted,
+                attended_features,
+                transformer_fused,
+            ],
+            dim=1,
+        )
 
         # 적응형 융합 레이어로 최종 예측
         output = self.adaptive_fusion(final_fused)
 
         # 반환값 구성
         attention_info = {
-            'cross_attention_weights': cross_attention_weights,
-            'dynamic_weights': dynamic_weights,
-            'importance_scores': importance_scores,
-            'modality_weights': torch.softmax(self.modality_weights, dim=0)
+            "cross_attention_weights": cross_attention_weights,
+            "dynamic_weights": dynamic_weights,
+            "importance_scores": importance_scores,
+            "modality_weights": torch.softmax(self.modality_weights, dim=0),
         }
 
         return output, attention_info, dynamic_weights
@@ -419,27 +435,33 @@ class AdvancedMultimodalTrainer:
                 outputs, attention_info, dynamic_weights = self.model(
                     big5, cmi, rppg, voice
                 )
-                
+
                 # 기본 손실
                 basic_loss = criterion(outputs.squeeze(), targets)
-                
+
                 # 정규화 손실 (모달리티 가중치 균형)
-                modality_weights = attention_info['modality_weights']
-                weight_entropy = -torch.sum(modality_weights * torch.log(modality_weights + 1e-8))
+                modality_weights = attention_info["modality_weights"]
+                weight_entropy = -torch.sum(
+                    modality_weights * torch.log(modality_weights + 1e-8)
+                )
                 weight_regularization = 0.01 * weight_entropy
-                
+
                 # 중요도 스코어 정규화
-                importance_scores = attention_info['importance_scores']
-                importance_regularization = 0.001 * sum(torch.mean(score) for score in importance_scores)
-                
+                importance_scores = attention_info["importance_scores"]
+                importance_regularization = 0.001 * sum(
+                    torch.mean(score) for score in importance_scores
+                )
+
                 # 총 손실
-                total_loss = basic_loss + weight_regularization + importance_regularization
-                
+                total_loss = (
+                    basic_loss + weight_regularization + importance_regularization
+                )
+
                 total_loss.backward()
-                
+
                 # 그래디언트 클리핑
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
-                
+
                 optimizer.step()
 
                 train_loss += total_loss.item()
@@ -460,7 +482,9 @@ class AdvancedMultimodalTrainer:
                     voice = batch["voice"].to(self.device)
                     targets = batch["target"].to(self.device)
 
-                    outputs, attention_info, dynamic_weights = self.model(big5, cmi, rppg, voice)
+                    outputs, attention_info, dynamic_weights = self.model(
+                        big5, cmi, rppg, voice
+                    )
                     loss = criterion(outputs.squeeze(), targets)
                     val_loss += loss.item()
 
@@ -550,10 +574,12 @@ class AdvancedMultimodalTrainer:
 
                 test_predictions.extend(outputs.squeeze().cpu().numpy())
                 test_targets.extend(targets.cpu().numpy())
-                
+
                 # 어텐션 정보 저장
-                if attention_info['cross_attention_weights'] is not None:
-                    attention_weights_list.append(attention_info['cross_attention_weights'].cpu().numpy())
+                if attention_info["cross_attention_weights"] is not None:
+                    attention_weights_list.append(
+                        attention_info["cross_attention_weights"].cpu().numpy()
+                    )
                 modality_weights_list.append(dynamic_weights.cpu().numpy())
 
         # 메트릭 계산
