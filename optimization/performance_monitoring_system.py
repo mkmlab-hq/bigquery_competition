@@ -142,7 +142,9 @@ class PerformanceMonitor:
             return False
 
         current_mae = record["metrics"].get("mae", 0)
-        historical_mae = [r["metrics"].get("mae", 0) for r in list(self.metrics_history)[-20:]]
+        historical_mae = [
+            r["metrics"].get("mae", 0) for r in list(self.metrics_history)[-20:]
+        ]
 
         # 기준선 설정 (처음 10개 데이터의 평균)
         baseline = np.mean(historical_mae[:10])
@@ -235,36 +237,62 @@ class PerformanceMonitor:
         loss_values = [m.get("loss", 0) for m in all_metrics]
 
         summary = {
-            "monitoring_duration": time.time() - self.monitoring_start_time if self.monitoring_start_time else 0,
+            "monitoring_duration": (
+                time.time() - self.monitoring_start_time
+                if self.monitoring_start_time
+                else 0
+            ),
             "total_records": len(self.metrics_history),
             "recent_performance": {
                 "mae": {
                     "current": mae_values[-1] if mae_values else 0,
-                    "average": np.mean(mae_values[-10:]) if len(mae_values) >= 10 else np.mean(mae_values),
+                    "average": (
+                        np.mean(mae_values[-10:])
+                        if len(mae_values) >= 10
+                        else np.mean(mae_values)
+                    ),
                     "trend": self.performance_trends.get("mae_trend", 0),
                 },
                 "mse": {
                     "current": mse_values[-1] if mse_values else 0,
-                    "average": np.mean(mse_values[-10:]) if len(mse_values) >= 10 else np.mean(mse_values),
+                    "average": (
+                        np.mean(mse_values[-10:])
+                        if len(mse_values) >= 10
+                        else np.mean(mse_values)
+                    ),
                     "trend": self.performance_trends.get("mse_trend", 0),
                 },
                 "loss": {
                     "current": loss_values[-1] if loss_values else 0,
-                    "average": np.mean(loss_values[-10:]) if len(loss_values) >= 10 else np.mean(loss_values),
+                    "average": (
+                        np.mean(loss_values[-10:])
+                        if len(loss_values) >= 10
+                        else np.mean(loss_values)
+                    ),
                     "trend": self.performance_trends.get("loss_trend", 0),
                 },
             },
             "alerts": {
                 "total": len(self.alerts_history),
-                "recent": len([a for a in self.alerts_history if (datetime.now() - a["timestamp"]).seconds < 3600]),
-                "critical": len([a for a in self.alerts_history if a["severity"] == "CRITICAL"]),
+                "recent": len(
+                    [
+                        a
+                        for a in self.alerts_history
+                        if (datetime.now() - a["timestamp"]).seconds < 3600
+                    ]
+                ),
+                "critical": len(
+                    [a for a in self.alerts_history if a["severity"] == "CRITICAL"]
+                ),
             },
             "overall_trend": self.performance_trends.get("overall_trend", 0),
         }
 
         return summary
 
-    def create_performance_dashboard(self, save_path: str = "performance_dashboard.png"):
+    def create_performance_dashboard(
+        self, save_path: str = "performance_dashboard.png"
+    ):
         """성능 대시보드 생성"""
         if not self.metrics_history:
             print("❌ 표시할 데이터가 없습니다")
@@ -304,7 +332,7 @@ class PerformanceMonitor:
         # 4. 성능 요약
         summary = self.get_performance_summary()
         axes[1, 1].axis("off")
-        
+
         summary_text = f"""
 성능 요약:
 • 모니터링 시간: {summary['monitoring_duration']:.1f}초
@@ -317,9 +345,16 @@ class PerformanceMonitor:
 • 최근 알림: {summary['alerts']['recent']}
 • 심각한 알림: {summary['alerts']['critical']}
         """
-        
-        axes[1, 1].text(0.1, 0.9, summary_text, transform=axes[1, 1].transAxes, 
-                        fontsize=10, verticalalignment='top', fontfamily='monospace')
+
+        axes[1, 1].text(
+            0.1,
+            0.9,
+            summary_text,
+            transform=axes[1, 1].transAxes,
+            fontsize=10,
+            verticalalignment="top",
+            fontfamily="monospace",
+        )
 
         plt.tight_layout()
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
@@ -374,7 +409,7 @@ class PerformanceMonitor:
             return
 
         summary = self.get_performance_summary()
-        
+
         html_content = f"""
         <!DOCTYPE html>
         <html>
@@ -431,10 +466,12 @@ class ModelPerformanceTracker:
         if model_name not in self.model_metrics:
             self.model_metrics[model_name] = []
 
-        self.model_metrics[model_name].append({
-            "timestamp": datetime.now(),
-            "metrics": metrics,
-        })
+        self.model_metrics[model_name].append(
+            {
+                "timestamp": datetime.now(),
+                "metrics": metrics,
+            }
+        )
 
     def compare_models(self, model_names: List[str]) -> Dict[str, Any]:
         """모델 성능 비교"""
@@ -465,8 +502,12 @@ class ModelPerformanceTracker:
 
         # 최고 성능 모델 찾기
         if comparison:
-            best_mae_model = min(comparison.keys(), key=lambda x: comparison[x]["avg_mae"])
-            best_mse_model = min(comparison.keys(), key=lambda x: comparison[x]["avg_mse"])
+            best_mae_model = min(
+                comparison.keys(), key=lambda x: comparison[x]["avg_mae"]
+            )
+            best_mse_model = min(
+                comparison.keys(), key=lambda x: comparison[x]["avg_mse"]
+            )
 
             comparison["best_models"] = {
                 "mae": best_mae_model,
@@ -504,11 +545,11 @@ def main():
 
     # 시뮬레이션 데이터로 테스트
     print("📊 시뮬레이션 데이터로 테스트 중...")
-    
+
     for i in range(50):
         # 가상의 성능 메트릭 생성
         mae = 0.5 + 0.1 * np.sin(i * 0.1) + np.random.normal(0, 0.05)
-        mse = mae ** 2 + np.random.normal(0, 0.01)
+        mse = mae**2 + np.random.normal(0, 0.01)
         loss = mse + np.random.normal(0, 0.02)
 
         metrics = {

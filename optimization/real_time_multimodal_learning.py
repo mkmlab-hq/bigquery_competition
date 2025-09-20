@@ -57,20 +57,20 @@ class OnlineMultimodalLearner:
         self.adaptive_lr_scheduler = None
         self.lr_decay_factor = 0.95
         self.lr_patience = 5
-        
+
         # 불확실성 추정
         self.uncertainty_threshold = 0.1
         self.uncertainty_history = deque(maxlen=100)
-        
+
         # 컨셉 드리프트 탐지
         self.drift_detector = None
         self.drift_threshold = 0.05
         self.drift_history = deque(maxlen=200)
-        
+
         # 성능 모니터링
         self.performance_history = deque(maxlen=1000)
         self.alert_threshold = 0.1
-        
+
         # 데이터 버퍼
         self.data_buffer = deque(maxlen=buffer_size)
         self.target_buffer = deque(maxlen=buffer_size)
@@ -224,9 +224,11 @@ class OnlineMultimodalLearner:
         # 불확실성 추정
         uncertainty = 0.0
         if self.use_uncertainty_estimation:
-            uncertainty = self._estimate_uncertainty(big5_batch, cmi_batch, rppg_batch, voice_batch)
+            uncertainty = self._estimate_uncertainty(
+                big5_batch, cmi_batch, rppg_batch, voice_batch
+            )
             self.uncertainty_history.append(uncertainty)
-            
+
             # 불확실성이 높으면 학습률 조정
             if uncertainty > self.uncertainty_threshold:
                 self.learning_rate *= 1.1  # 학습률 증가
@@ -249,10 +251,10 @@ class OnlineMultimodalLearner:
         total_loss = loss + l2_reg
 
         total_loss.backward()
-        
+
         # 그래디언트 클리핑
         torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
-        
+
         self.optimizer.step()
 
         # 성능 기록 및 모니터링
@@ -284,63 +286,74 @@ class OnlineMultimodalLearner:
     def _detect_concept_drift(self, big5_batch, targets_batch):
         """컨셉 드리프트 탐지"""
         if len(self.drift_history) < 50:
-            self.drift_history.append((big5_batch.cpu().numpy(), targets_batch.cpu().numpy()))
+            self.drift_history.append(
+                (big5_batch.cpu().numpy(), targets_batch.cpu().numpy())
+            )
             return False
-        
+
         # 최근 데이터와 이전 데이터 비교
         recent_data = np.array([x[0] for x in list(self.drift_history)[-10:]])
         older_data = np.array([x[0] for x in list(self.drift_history)[-50:-10]])
-        
+
         # 분포 변화 측정 (간단한 통계적 테스트)
         recent_mean = np.mean(recent_data, axis=0)
         older_mean = np.mean(older_data, axis=0)
-        
+
         drift_score = np.linalg.norm(recent_mean - older_mean)
-        
+
         # 새로운 데이터 추가
-        self.drift_history.append((big5_batch.cpu().numpy(), targets_batch.cpu().numpy()))
-        
+        self.drift_history.append(
+            (big5_batch.cpu().numpy(), targets_batch.cpu().numpy())
+        )
+
         return drift_score > self.drift_threshold
 
     def _handle_concept_drift(self):
         """컨셉 드리프트 처리"""
         print("🔄 컨셉 드리프트 탐지됨 - 모델 재초기화")
-        
+
         # 학습률 증가
         self.learning_rate *= 1.5
-        
+
         # 모델 가중치 재초기화 (부분적)
         for layer in self.model.children():
-            if hasattr(layer, 'reset_parameters'):
+            if hasattr(layer, "reset_parameters"):
                 layer.reset_parameters()
 
     def _estimate_uncertainty(self, big5_batch, cmi_batch, rppg_batch, voice_batch):
         """불확실성 추정 (Monte Carlo Dropout)"""
         self.model.train()  # Dropout 활성화
-        
+
         predictions = []
         for _ in range(10):  # 10번 샘플링
             with torch.no_grad():
                 pred, _ = self.model(big5_batch, cmi_batch, rppg_batch, voice_batch)
                 predictions.append(pred.cpu().numpy())
-        
+
         predictions = np.array(predictions)
         uncertainty = np.std(predictions, axis=0).mean()
-        
+
         return uncertainty
 
     def _update_adaptive_learning_rate(self):
         """적응형 학습률 업데이트"""
         if len(self.performance_history) < self.lr_patience:
             return
-        
-        recent_performance = [p['mae'] for p in list(self.performance_history)[-self.lr_patience:]]
-        older_performance = [p['mae'] for p in list(self.performance_history)[-self.lr_patience*2:-self.lr_patience]]
-        
+
+        recent_performance = [
+            p["mae"] for p in list(self.performance_history)[-self.lr_patience :]
+        ]
+        older_performance = [
+            p["mae"]
+            for p in list(self.performance_history)[
+                -self.lr_patience * 2 : -self.lr_patience
+            ]
+        ]
+
         if len(older_performance) > 0:
             recent_avg = np.mean(recent_performance)
             older_avg = np.mean(older_performance)
-            
+
             # 성능이 개선되지 않으면 학습률 감소
             if recent_avg >= older_avg:
                 self.learning_rate *= self.lr_decay_factor
@@ -350,30 +363,30 @@ class OnlineMultimodalLearner:
         """성능 알림 체크"""
         if len(self.performance_history) < 10:
             return
-        
-        recent_mae = [p['mae'] for p in list(self.performance_history)[-10:]]
-        overall_mae = [p['mae'] for p in list(self.performance_history)]
-        
+
+        recent_mae = [p["mae"] for p in list(self.performance_history)[-10:]]
+        overall_mae = [p["mae"] for p in list(self.performance_history)]
+
         recent_avg = np.mean(recent_mae)
         overall_avg = np.mean(overall_mae)
-        
+
         # 성능이 크게 저하된 경우
         if recent_avg > overall_avg * (1 + self.alert_threshold):
             print(f"⚠️ 성능 저하 감지: {recent_avg:.4f} > {overall_avg:.4f}")
-            
+
             # 자동 복구 시도
             self._attempt_recovery()
 
     def _attempt_recovery(self):
         """성능 복구 시도"""
         print("🔧 성능 복구 시도 중...")
-        
+
         # 학습률 조정
         self.learning_rate *= 0.5
-        
+
         # 모델 가중치 부분 재초기화
         for name, param in self.model.named_parameters():
-            if 'weight' in name and param.requires_grad:
+            if "weight" in name and param.requires_grad:
                 # 가중치에 작은 노이즈 추가
                 noise = torch.randn_like(param) * 0.01
                 param.data += noise
