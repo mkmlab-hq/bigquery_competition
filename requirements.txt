@@ -1,0 +1,26 @@
+# BigQuery 대회 핵심 시스템 요구사항
+
+# 데이터 처리
+pandas>=1.5.0
+numpy>=1.21.0
+scipy>=1.9.0
+
+# 머신러닝
+scikit-learn>=1.1.0
+shap>=0.41.0
+
+# 시각화
+matplotlib>=3.5.0
+seaborn>=0.11.0
+plotly>=5.10.0
+
+# Google Cloud
+google-cloud-bigquery>=3.4.0
+google-cloud-aiplatform>=1.20.0
+
+# 기타
+warnings
+json
+time
+datetime
+typing

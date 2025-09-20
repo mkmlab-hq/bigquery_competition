@@ -1,0 +1,30 @@
+{
+  "bigquery_competition/": {
+    "core_systems/": {
+      "vector_search_system.py": "벡터 검색 시스템",
+      "ai_generate_system.py": "AI 생성 시스템",
+      "multimodal_integrated_system.py": "멀티모달 통합 시스템",
+      "enhanced_shap_analysis.py": "SHAP 분석 시스템"
+    },
+    "analysis/": {
+      "advanced_big5_clustering.py": "고급 클러스터링",
+      "advanced_correlation_analysis.py": "상관관계 분석",
+      "advanced_big5_visualization.py": "시각화 시스템"
+    },
+    "optimization/": {
+      "bigquery_optimization_strategy.py": "BigQuery 최적화",
+      "data_quality_improvement.py": "데이터 품질 개선"
+    },
+    "testing/": {
+      "integration_test.py": "통합 테스트",
+      "bigquery_competition_manager.py": "통합 관리자"
+    },
+    "results/": {
+      "advanced_clustering_results/": "클러스터링 결과",
+      "correlation_analysis_results/": "상관관계 분석 결과",
+      "advanced_visualization_results/": "시각화 결과",
+      "bigquery_optimization_results/": "BigQuery 최적화 결과",
+      "bigquery_competition_results/": "통합 결과"
+    }
+  }
+}
