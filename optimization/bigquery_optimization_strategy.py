@@ -11,7 +11,7 @@ import json
 import time
 import warnings
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import google.cloud.bigquery as bigquery
 import numpy as np
@@ -29,11 +29,16 @@ class BigQueryOptimizationStrategy:
 
         os.makedirs(self.results_dir, exist_ok=True)
 
-    def analyze_current_performance(self):
-        """현재 쿼리 성능 분석"""
+    # 개선된 성능 분석 함수
+    def analyze_current_performance(self) -> Dict[str, Dict[str, Any]]:
+        """
+        현재 BigQuery 성능을 분석합니다.
+
+        Returns:
+            Dict[str, Dict[str, Any]]: 각 쿼리의 성능 결과.
+        """
         print("📊 현재 BigQuery 성능 분석 중...")
 
-        # 기본 Big5 쿼리 성능 테스트
         queries = {
             "basic_big5": """
                 SELECT * FROM `{project_id}.big5_dataset.big5_preprocessed` 
@@ -49,28 +54,6 @@ class BigQueryOptimizationStrategy:
                     AVG(OPN1) as avg_opn1
                 FROM `{project_id}.big5_dataset.big5_preprocessed`
             """,
-            "country_analysis": """
-                SELECT 
-                    country,
-                    COUNT(*) as count,
-                    AVG(EXT1) as avg_ext1,
-                    AVG(EST1) as avg_est1,
-                    AVG(AGR1) as avg_agr1,
-                    AVG(CSN1) as avg_csn1,
-                    AVG(OPN1) as avg_opn1
-                FROM `{project_id}.big5_dataset.big5_preprocessed`
-                GROUP BY country
-                ORDER BY count DESC
-                LIMIT 20
-            """,
-            "correlation_analysis": """
-                SELECT 
-                    CORR(EXT1, EST1) as ext_est_corr,
-                    CORR(EXT1, AGR1) as ext_agr_corr,
-                    CORR(EST1, AGR1) as est_agr_corr,
-                    CORR(CSN1, OPN1) as csn_opn_corr
-                FROM `{project_id}.big5_dataset.big5_preprocessed`
-            """,
         }
 
         performance_results = {}
@@ -83,8 +66,14 @@ class BigQueryOptimizationStrategy:
                 query_job = self.client.query(query)
                 results = query_job.result()
 
+                # 쿼리 실행 계획 분석 추가
+                query_plan = query_job.query_plan
+                for stage in query_plan:
+                    print(
+                        f"Stage {stage['name']}: {stage['start_time']} - {stage['end_time']}"
+                    )
+
                 # 쿼리 통계 수집
-                job_stats = query_job.dry_run
                 bytes_processed = (
                     query_job.total_bytes_processed
                     if hasattr(query_job, "total_bytes_processed")
@@ -97,7 +86,6 @@ class BigQueryOptimizationStrategy:
                 )
 
                 execution_time = time.time() - start_time
-
                 performance_results[query_name] = {
                     "execution_time": execution_time,
                     "bytes_processed": bytes_processed,
@@ -185,6 +173,7 @@ class BigQueryOptimizationStrategy:
 
         return optimized_queries
 
+    # Materialized View 생성 자동화 추가
     def create_materialized_views(self):
         """Materialized Views 생성"""
         print("\n📊 Materialized Views 생성 중...")
@@ -199,58 +188,23 @@ class BigQueryOptimizationStrategy:
                     country,
                     COUNT(*) as total_count,
                     AVG(EXT1) as avg_ext,
-                    STDDEV(EXT1) as std_ext,
                     AVG(EST1) as avg_est,
-                    STDDEV(EST1) as std_est,
                     AVG(AGR1) as avg_agr,
-                    STDDEV(AGR1) as std_agr,
                     AVG(CSN1) as avg_csn,
-                    STDDEV(CSN1) as std_csn,
-                    AVG(OPN1) as avg_opn,
-                    STDDEV(OPN1) as std_opn,
-                    CURRENT_TIMESTAMP() as created_at
+                    AVG(OPN1) as avg_opn
                 FROM `{project_id}.big5_dataset.big5_preprocessed`
                 WHERE country IS NOT NULL
                 GROUP BY country
             """,
-            "big5_personality_clusters": """
-                CREATE OR REPLACE MATERIALIZED VIEW `{project_id}.big5_dataset.big5_personality_clusters`
-                PARTITION BY DATE('2024-01-01')
-                CLUSTER BY personality_type
-                AS
-                SELECT 
-                    *,
-                    CASE 
-                        WHEN EXT1 > 4 AND OPN1 > 4 THEN 'High_Ext_Opn'
-                        WHEN EST1 < 2 AND AGR1 > 4 THEN 'Low_Est_High_Agr'
-                        WHEN CSN1 > 4 AND OPN1 > 4 THEN 'High_Csn_Opn'
-                        WHEN EXT1 < 2 AND EST1 < 2 THEN 'Low_Ext_Est'
-                        ELSE 'Mixed'
-                    END as personality_type
-                FROM `{project_id}.big5_dataset.big5_preprocessed`
-                WHERE country IS NOT NULL
-            """,
-            "big5_correlations": """
-                CREATE OR REPLACE MATERIALIZED VIEW `{project_id}.big5_dataset.big5_correlations`
-                PARTITION BY DATE('2024-01-01')
-                AS
-                SELECT 
-                    CORR(EXT1, EST1) as ext_est_corr,
-                    CORR(EXT1, AGR1) as ext_agr_corr,
-                    CORR(EXT1, CSN1) as ext_csn_corr,
-                    CORR(EXT1, OPN1) as ext_opn_corr,
-                    CORR(EST1, AGR1) as est_agr_corr,
-                    CORR(EST1, CSN1) as est_csn_corr,
-                    CORR(EST1, OPN1) as est_opn_corr,
-                    CORR(AGR1, CSN1) as agr_csn_corr,
-                    CORR(AGR1, OPN1) as agr_opn_corr,
-                    CORR(CSN1, OPN1) as csn_opn_corr,
-                    CURRENT_TIMESTAMP() as created_at
-                FROM `{project_id}.big5_dataset.big5_preprocessed`
-            """,
         }
 
-        return materialized_views
+        for view_name, view_query in materialized_views.items():
+            try:
+                formatted_query = view_query.format(project_id=self.project_id)
+                self.client.query(formatted_query).result()
+                print(f"✅ Materialized View 생성 완료: {view_name}")
+            except Exception as e:
+                print(f"❌ Materialized View 생성 실패: {view_name} - {e}")
 
     def test_optimized_queries(self, optimized_queries):
         """최적화된 쿼리 성능 테스트"""

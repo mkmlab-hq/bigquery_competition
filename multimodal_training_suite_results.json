@@ -1,0 +1,28 @@
+{
+  "training_results": {
+    "advanced_training": {
+      "status": "failed",
+      "error": "Traceback (most recent call last):\n  File \"F:\\workspace\\bigquery_competition\\optimization\\advanced_multimodal_training.py\", line 653, in <module>\n    main()\n  File \"F:\\workspace\\bigquery_competition\\optimization\\advanced_multimodal_training.py\", line 636, in main\n    print(\"\\U0001f9e0 \uace0\uae09 \uba40\ud2f0\ubaa8\ub2ec \ud6c8\ub828 \uc2dc\uc2a4\ud15c\")\nUnicodeEncodeError: 'cp949' codec can't encode character '\\U0001f9e0' in position 0: illegal multibyte sequence\n"
+    },
+    "realtime_learning": {
+      "status": "failed",
+      "error": "Traceback (most recent call last):\n  File \"F:\\workspace\\bigquery_competition\\optimization\\real_time_multimodal_learning.py\", line 540, in <module>\n    main()\n  File \"F:\\workspace\\bigquery_competition\\optimization\\real_time_multimodal_learning.py\", line 532, in main\n    print(\"\\U0001f9e0 \uc2e4\uc2dc\uac04 \uba40\ud2f0\ubaa8\ub2ec \ud559\uc2b5 \uc2dc\uc2a4\ud15c\")\nUnicodeEncodeError: 'cp949' codec can't encode character '\\U0001f9e0' in position 0: illegal multibyte sequence\n"
+    },
+    "performance_optimization": {
+      "status": "failed",
+      "error": "Traceback (most recent call last):\n  File \"F:\\workspace\\bigquery_competition\\optimization\\multimodal_performance_optimizer.py\", line 621, in <module>\n    main()\n  File \"F:\\workspace\\bigquery_competition\\optimization\\multimodal_performance_optimizer.py\", line 605, in main\n    print(\"\\U0001f9e0 \uba40\ud2f0\ubaa8\ub2ec \uc131\ub2a5 \ucd5c\uc801\ud654 \uc2dc\uc2a4\ud15c\")\nUnicodeEncodeError: 'cp949' codec can't encode character '\\U0001f9e0' in position 0: illegal multibyte sequence\n"
+    }
+  },
+  "dependencies": {
+    "torch": true,
+    "sklearn": true,
+    "pandas": true,
+    "numpy": true,
+    "matplotlib": true,
+    "seaborn": true,
+    "tqdm": true
+  },
+  "total_time_minutes": 1.261210564772288,
+  "successful_trainings": 0,
+  "total_trainings": 3
+}
