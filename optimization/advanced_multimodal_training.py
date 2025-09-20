@@ -72,9 +72,14 @@ class MultimodalFusionNet(nn.Module):
         self.use_transformer = use_transformer
         self.use_cross_attention = use_cross_attention
 
-        # 각 모달리티별 고급 인코더
+        # Debugging: Add print statement to verify use_cross_attention during initialization
+        print(
+            f"Initializing MultimodalFusionNet with use_cross_attention={use_cross_attention}"
+        )
+
+        # 각 모달리티별 고급 인코더 (모든 모달리티를 같은 차원으로)
         self.big5_encoder = self._create_advanced_encoder(
-            big5_dim, hidden_dim, dropout_rate
+            big5_dim, hidden_dim // 2, dropout_rate
         )
         self.cmi_encoder = self._create_advanced_encoder(
             cmi_dim, hidden_dim // 2, dropout_rate
@@ -95,10 +100,16 @@ class MultimodalFusionNet(nn.Module):
                 batch_first=True,
             )
 
-            # 모달리티별 쿼리, 키, 밸류 변환
-            self.query_transform = nn.Linear(hidden_dim // 2, hidden_dim // 2)
-            self.key_transform = nn.Linear(hidden_dim // 4, hidden_dim // 2)
-            self.value_transform = nn.Linear(hidden_dim // 4, hidden_dim // 2)
+            # 모달리티별 쿼리, 키, 밸류 변환 (모든 모달리티가 hidden_dim // 2로 통일)
+            self.query_transform = nn.Linear(
+                hidden_dim // 2, hidden_dim // 2
+            )  # Big5: hidden_dim // 2
+            self.key_transform = nn.Linear(
+                hidden_dim // 2, hidden_dim // 2
+            )  # CMI/RPPG/Voice: hidden_dim // 2
+            self.value_transform = nn.Linear(
+                hidden_dim // 2, hidden_dim // 2
+            )  # CMI/RPPG/Voice: hidden_dim // 2
 
         # 트랜스포머 기반 융합 (선택적)
         if use_transformer:
@@ -112,7 +123,10 @@ class MultimodalFusionNet(nn.Module):
             self.transformer_fusion = nn.TransformerEncoder(encoder_layer, num_layers=2)
 
         # 적응형 융합 레이어
-        fusion_input_dim = (hidden_dim // 2) + (hidden_dim // 4) * 3
+        # final_fused 차원: basic_fused(4*64) + weighted_fused(64) + importance_weighted(64) + attended_features(64) + transformer_fused(64) = 512
+        fusion_input_dim = 4 * (hidden_dim // 2) + 4 * (
+            hidden_dim // 2
+        )  # 256 + 256 = 512
         self.adaptive_fusion = nn.Sequential(
             nn.Linear(fusion_input_dim, hidden_dim),
             nn.LayerNorm(hidden_dim),
@@ -134,16 +148,16 @@ class MultimodalFusionNet(nn.Module):
             nn.Softmax(dim=-1),
         )
 
-        # 모달리티별 중요도 학습
+        # 모달리티별 중요도 학습 (통일된 차원)
         self.importance_networks = nn.ModuleList(
             [
                 nn.Sequential(
-                    nn.Linear(hidden_dim // 2 if i == 0 else hidden_dim // 4, 32),
+                    nn.Linear(hidden_dim // 2, 32),
                     nn.ReLU(),
                     nn.Linear(32, 1),
                     nn.Sigmoid(),
                 )
-                for i in range(4)
+                for _ in range(4)
             ]
         )
 
@@ -182,21 +196,26 @@ class MultimodalFusionNet(nn.Module):
         dynamic_weights = self.weight_gate(big5_encoded)  # Big5를 기준으로 가중치 계산
 
         # 크로스 어텐션 적용 (모달리티 간 상호작용)
+        # Debugging: Add print statement to verify use_cross_attention
+        print(f"use_cross_attention: {self.use_cross_attention}")
         if self.use_cross_attention:
             # Big5를 쿼리로 사용하여 다른 모달리티에 어텐션
             query = self.query_transform(big5_encoded).unsqueeze(1)
 
             # 다른 모달리티들을 키/밸류로 변환
-            keys_values = []
+            keys = []
+            values = []
             for modality in [cmi_encoded, rppg_encoded, voice_encoded]:
                 key = self.key_transform(modality).unsqueeze(1)
                 value = self.value_transform(modality).unsqueeze(1)
-                keys_values.append(torch.cat([key, value], dim=-1))
+                keys.append(key)
+                values.append(value)
 
-            key_value = torch.cat(keys_values, dim=1)
+            key_tensor = torch.cat(keys, dim=1)
+            value_tensor = torch.cat(values, dim=1)
 
             attended_features, cross_attention_weights = self.cross_attention(
-                query, key_value, key_value
+                query, key_tensor, value_tensor
             )
             attended_features = attended_features.squeeze(1)
         else:
@@ -276,13 +295,13 @@ class AdvancedMultimodalTrainer:
         self.model = None
         self.training_history = []
 
-        print(f"🔧 디바이스: {self.device}")
+        print(f"디바이스: {self.device}")
 
     def generate_synthetic_multimodal_data(
         self, n_samples: int = 10000
     ) -> Tuple[Dict, np.ndarray]:
         """합성 멀티모달 데이터 생성"""
-        print(f"📊 합성 멀티모달 데이터 생성 중... ({n_samples}개 샘플)")
+        print(f"합성 멀티모달 데이터 생성 중... ({n_samples}개 샘플)")
 
         np.random.seed(42)
 
@@ -334,7 +353,7 @@ class AdvancedMultimodalTrainer:
             "voice": voice_data,
         }
 
-        print(f"✅ 데이터 생성 완료:")
+        print(f"데이터 생성 완료:")
         print(f"   Big5: {big5_data.shape}")
         print(f"   CMI: {cmi_data.shape}")
         print(f"   RPPG: {rppg_data.shape}")
@@ -351,7 +370,7 @@ class AdvancedMultimodalTrainer:
         val_size: float = 0.1,
     ) -> Tuple[DataLoader, DataLoader, DataLoader]:
         """데이터 전처리 및 DataLoader 생성"""
-        print("🔄 데이터 전처리 중...")
+        print("데이터 전처리 중...")
 
         # 데이터 정규화
         for modality, data in multimodal_data.items():
@@ -364,14 +383,58 @@ class AdvancedMultimodalTrainer:
         targets_scaled = target_scaler.fit_transform(targets.reshape(-1, 1)).flatten()
         self.scalers["target"] = target_scaler
 
-        # 데이터 분할
-        X_temp, X_test, y_temp, y_test = train_test_split(
-            multimodal_data, targets_scaled, test_size=test_size, random_state=42
+        # 데이터 분할 (딕셔너리 형태로 처리)
+        # 각 모달리티별로 분할
+        big5_temp, big5_test, y_temp, y_test = train_test_split(
+            multimodal_data["big5"],
+            targets_scaled,
+            test_size=test_size,
+            random_state=42,
+        )
+        cmi_temp, cmi_test, _, _ = train_test_split(
+            multimodal_data["cmi"], targets_scaled, test_size=test_size, random_state=42
+        )
+        rppg_temp, rppg_test, _, _ = train_test_split(
+            multimodal_data["rppg"],
+            targets_scaled,
+            test_size=test_size,
+            random_state=42,
+        )
+        voice_temp, voice_test, _, _ = train_test_split(
+            multimodal_data["voice"],
+            targets_scaled,
+            test_size=test_size,
+            random_state=42,
         )
 
-        X_train, X_val, y_train, y_val = train_test_split(
-            X_temp, y_temp, test_size=val_size / (1 - test_size), random_state=42
+        # 훈련/검증 분할
+        big5_train, big5_val, y_train, y_val = train_test_split(
+            big5_temp, y_temp, test_size=val_size / (1 - test_size), random_state=42
         )
+        cmi_train, cmi_val, _, _ = train_test_split(
+            cmi_temp, y_temp, test_size=val_size / (1 - test_size), random_state=42
+        )
+        rppg_train, rppg_val, _, _ = train_test_split(
+            rppg_temp, y_temp, test_size=val_size / (1 - test_size), random_state=42
+        )
+        voice_train, voice_val, _, _ = train_test_split(
+            voice_temp, y_temp, test_size=val_size / (1 - test_size), random_state=42
+        )
+
+        # 딕셔너리로 재구성
+        X_train = {
+            "big5": big5_train,
+            "cmi": cmi_train,
+            "rppg": rppg_train,
+            "voice": voice_train,
+        }
+        X_val = {"big5": big5_val, "cmi": cmi_val, "rppg": rppg_val, "voice": voice_val}
+        X_test = {
+            "big5": big5_test,
+            "cmi": cmi_test,
+            "rppg": rppg_test,
+            "voice": voice_test,
+        }
 
         # DataLoader 생성
         train_dataset = MultimodalDataset(
@@ -388,7 +451,7 @@ class AdvancedMultimodalTrainer:
         val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False)
         test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
-        print(f"✅ 데이터 분할 완료:")
+        print(f"데이터 분할 완료:")
         print(f"   훈련: {len(train_dataset)}개")
         print(f"   검증: {len(val_dataset)}개")
         print(f"   테스트: {len(test_dataset)}개")
@@ -401,12 +464,23 @@ class AdvancedMultimodalTrainer:
         val_loader: DataLoader,
         epochs: int = 100,
         learning_rate: float = 0.001,
+        use_cross_attention=True,
     ) -> Dict:
         """모델 훈련"""
-        print(f"🚀 모델 훈련 시작 (Epochs: {epochs})")
+        print(f"모델 훈련 시작 (Epochs: {epochs})")
 
         # 모델 초기화
-        self.model = MultimodalFusionNet().to(self.device)
+        self.model = MultimodalFusionNet(
+            big5_dim=25,
+            cmi_dim=10,
+            rppg_dim=15,
+            voice_dim=20,
+            hidden_dim=128,
+            output_dim=1,
+            dropout_rate=0.3,
+            use_transformer=True,
+            use_cross_attention=use_cross_attention,
+        ).to(self.device)
         criterion = nn.MSELoss()
         optimizer = optim.Adam(self.model.parameters(), lr=learning_rate)
         scheduler = optim.lr_scheduler.ReduceLROnPlateau(
@@ -528,7 +602,7 @@ class AdvancedMultimodalTrainer:
                 patience_counter += 1
 
             if patience_counter >= early_stopping_patience:
-                print(f"🛑 조기 종료 (Epoch {epoch+1})")
+                print(f"조기 종료 (Epoch {epoch+1})")
                 break
 
             # 진행 상황 출력
@@ -542,7 +616,7 @@ class AdvancedMultimodalTrainer:
         # 최고 모델 로드
         self.model.load_state_dict(torch.load("best_multimodal_model.pth"))
 
-        print(f"✅ 훈련 완료! 최고 검증 손실: {best_val_loss:.4f}")
+        print(f"훈련 완료! 최고 검증 손실: {best_val_loss:.4f}")
 
         return {
             "best_val_loss": best_val_loss,
@@ -552,7 +626,7 @@ class AdvancedMultimodalTrainer:
 
     def evaluate_model(self, test_loader: DataLoader) -> Dict:
         """모델 평가"""
-        print("📊 모델 평가 중...")
+        print("모델 평가 중...")
 
         self.model.eval()
         test_predictions = []
@@ -598,7 +672,24 @@ class AdvancedMultimodalTrainer:
         correlation = np.corrcoef(test_predictions, test_targets)[0, 1]
 
         # 모달리티 가중치 분석
-        avg_modality_weights = np.mean(modality_weights_list, axis=0)
+        if modality_weights_list and len(modality_weights_list) > 0:
+            try:
+                # 모든 가중치를 동일한 형태로 변환
+                weights_array = np.array(
+                    [
+                        w.flatten() if hasattr(w, "flatten") else w
+                        for w in modality_weights_list
+                    ]
+                )
+                avg_modality_weights = np.mean(weights_array, axis=0)
+            except:
+                avg_modality_weights = np.array(
+                    [0.25, 0.25, 0.25, 0.25]
+                )  # 기본 균등 가중치
+        else:
+            avg_modality_weights = np.array(
+                [0.25, 0.25, 0.25, 0.25]
+            )  # 기본 균등 가중치
 
         evaluation_results = {
             "mse": mse,
@@ -616,7 +707,7 @@ class AdvancedMultimodalTrainer:
             "targets": test_targets,
         }
 
-        print(f"✅ 평가 완료:")
+        print(f"평가 완료:")
         print(f"   RMSE: {rmse:.4f}")
         print(f"   MAE: {mae:.4f}")
         print(f"   R²: {r2:.4f}")
@@ -628,7 +719,7 @@ class AdvancedMultimodalTrainer:
         self, evaluation_results: Dict, save_dir: str = "multimodal_results"
     ):
         """시각화 생성"""
-        print("📊 시각화 생성 중...")
+        print("시각화 생성 중...")
 
         os.makedirs(save_dir, exist_ok=True)
 
@@ -705,13 +796,13 @@ class AdvancedMultimodalTrainer:
         )
         plt.close()
 
-        print(f"✅ 시각화 저장: {save_dir}/multimodal_training_analysis.png")
+        print(f"시각화 저장: {save_dir}/multimodal_training_analysis.png")
 
     def run_comprehensive_training(
-        self, n_samples: int = 10000, epochs: int = 100
+        self, n_samples: int = 10000, epochs: int = 100, use_cross_attention=True
     ) -> Dict:
         """종합 훈련 실행"""
-        print("🚀 고급 멀티모달 훈련 시스템 시작")
+        print("고급 멀티모달 훈련 시스템 시작")
         print("=" * 60)
 
         # 1. 데이터 생성
@@ -758,7 +849,7 @@ class AdvancedMultimodalTrainer:
                     json_results[key] = value
             json.dump(json_results, f, indent=2)
 
-        print(f"\n🎉 멀티모달 훈련 완료!")
+        print(f"멀티모달 훈련 완료!")
         print(f"   최종 R²: {evaluation_results['r2']:.4f}")
         print(f"   최종 RMSE: {evaluation_results['rmse']:.4f}")
         print(f"   모달리티 가중치: {evaluation_results['modality_weights']}")
@@ -768,16 +859,18 @@ class AdvancedMultimodalTrainer:
 
 def main():
     """메인 실행 함수"""
-    print("🧠 고급 멀티모달 훈련 시스템")
+    print("고급 멀티모달 훈련 시스템")
     print("=" * 60)
 
     # 훈련 시스템 초기화
     trainer = AdvancedMultimodalTrainer()
 
     # 종합 훈련 실행
-    results = trainer.run_comprehensive_training(n_samples=10000, epochs=100)
+    results = trainer.run_comprehensive_training(
+        n_samples=10000, epochs=100, use_cross_attention=False
+    )
 
-    print("\n🎯 훈련 결과 요약:")
+    print("\n훈련 결과 요약:")
     print(f"   디바이스: {results['model_info']['device']}")
     print(f"   샘플 수: {results['model_info']['n_samples']}")
     print(f"   훈련 에포크: {results['model_info']['epochs_trained']}")

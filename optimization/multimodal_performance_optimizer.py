@@ -157,7 +157,7 @@ class MultimodalPerformanceOptimizer:
         self.optimized_model = None
         self.performance_metrics = {}
 
-        print(f"🔧 성능 최적화 시스템 초기화")
+        print(f"성능 최적화 시스템 초기화")
         print(f"   디바이스: {self.device}")
         print(f"   CPU 코어 수: {mp.cpu_count()}")
         print(f"   메모리: {psutil.virtual_memory().total / (1024**3):.1f}GB")
@@ -166,7 +166,7 @@ class MultimodalPerformanceOptimizer:
         self, n_samples: int = 50000
     ) -> Tuple[Dict, np.ndarray]:
         """최적화용 대용량 데이터 생성"""
-        print(f"📊 최적화용 데이터 생성 중... ({n_samples}개 샘플)")
+        print(f"최적화용 데이터 생성 중... ({n_samples}개 샘플)")
 
         np.random.seed(42)
 
@@ -215,7 +215,7 @@ class MultimodalPerformanceOptimizer:
             "voice": voice_data,
         }
 
-        print(f"✅ 데이터 생성 완료: {n_samples}개 샘플")
+        print(f"데이터 생성 완료: {n_samples}개 샘플")
         return multimodal_data, targets
 
     def optimize_data_loading(
@@ -226,7 +226,7 @@ class MultimodalPerformanceOptimizer:
         num_workers: int = 4,
     ) -> DataLoader:
         """데이터 로딩 최적화"""
-        print(f"⚡ 데이터 로딩 최적화 중...")
+        print(f"데이터 로딩 최적화 중...")
 
         # 데이터 정규화
         for modality, data in multimodal_data.items():
@@ -260,7 +260,7 @@ class MultimodalPerformanceOptimizer:
             persistent_workers=True if num_workers > 0 else False,
         )
 
-        print(f"✅ 데이터 로딩 최적화 완료:")
+        print(f"데이터 로딩 최적화 완료:")
         print(f"   배치 크기: {batch_size}")
         print(f"   워커 수: {num_workers}")
         print(f"   캐시 사용: True")
@@ -269,7 +269,7 @@ class MultimodalPerformanceOptimizer:
 
     def train_optimized_model(self, dataloader: DataLoader, epochs: int = 50) -> Dict:
         """최적화된 모델 훈련"""
-        print(f"🚀 최적화된 모델 훈련 시작 (Epochs: {epochs})")
+        print(f"최적화된 모델 훈련 시작 (Epochs: {epochs})")
 
         # 모델 초기화
         self.optimized_model = QuantizedMultimodalNet().to(self.device)
@@ -345,7 +345,7 @@ class MultimodalPerformanceOptimizer:
         # 최고 모델 로드
         self.optimized_model.load_state_dict(torch.load("best_optimized_model.pth"))
 
-        print(f"✅ 훈련 완료! 최고 손실: {best_loss:.4f}")
+        print(f"훈련 완료! 최고 손실: {best_loss:.4f}")
 
         return {
             "best_loss": best_loss,
@@ -355,7 +355,7 @@ class MultimodalPerformanceOptimizer:
 
     def optimize_inference_speed(self, test_dataloader: DataLoader) -> Dict:
         """추론 속도 최적화"""
-        print("⚡ 추론 속도 최적화 중...")
+        print("추론 속도 최적화 중...")
 
         self.optimized_model.eval()
 
@@ -472,7 +472,7 @@ class MultimodalPerformanceOptimizer:
             "device": str(self.device),
         }
 
-        print(f"✅ 추론 속도 최적화 완료:")
+        print(f"추론 속도 최적화 완료:")
         print(f"   기본 추론: {basic_throughput:.1f} samples/sec")
         print(f"   TorchScript: {torchscript_throughput:.1f} samples/sec")
         print(f"   속도 향상: {torchscript_throughput/basic_throughput:.2f}x")
@@ -488,7 +488,7 @@ class MultimodalPerformanceOptimizer:
         save_path: str = "performance_optimization_report.png",
     ):
         """성능 최적화 보고서 생성"""
-        print("📊 성능 최적화 보고서 생성 중...")
+        print("성능 최적화 보고서 생성 중...")
 
         fig, axes = plt.subplots(2, 3, figsize=(18, 12))
 
@@ -597,13 +597,13 @@ class MultimodalPerformanceOptimizer:
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
         plt.close()
 
-        print(f"✅ 성능 최적화 보고서 저장: {save_path}")
+        print(f"성능 최적화 보고서 저장: {save_path}")
 
     def run_comprehensive_optimization(
         self, n_samples: int = 50000, epochs: int = 50
     ) -> Dict:
         """종합 성능 최적화 실행"""
-        print("🚀 종합 성능 최적화 시작")
+        print("종합 성능 최적화 시작")
         print("=" * 60)
 
         # 1. 데이터 생성
@@ -638,7 +638,7 @@ class MultimodalPerformanceOptimizer:
         with open("multimodal_optimization_results.json", "w") as f:
             json.dump(results, f, indent=2, default=str)
 
-        print(f"\n🎉 종합 성능 최적화 완료!")
+        print(f"\n종합 성능 최적화 완료!")
         print(
             f"   최종 추론 속도: {optimization_results['torchscript_inference']['throughput']:.1f} samples/sec"
         )
@@ -654,7 +654,7 @@ class MultimodalPerformanceOptimizer:
 
 def main():
     """메인 실행 함수"""
-    print("🧠 멀티모달 성능 최적화 시스템")
+    print("멀티모달 성능 최적화 시스템")
     print("=" * 60)
 
     # 최적화 시스템 초기화
@@ -663,7 +663,7 @@ def main():
     # 종합 최적화 실행
     results = optimizer.run_comprehensive_optimization(n_samples=50000, epochs=50)
 
-    print("\n🎯 최적화 결과 요약:")
+    print("\n최적화 결과 요약:")
     print(f"   디바이스: {results['system_info']['device']}")
     print(f"   샘플 수: {results['system_info']['n_samples']}")
     print(
@@ -673,3 +673,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

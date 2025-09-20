@@ -97,7 +97,8 @@ class OnlineMultimodalLearner:
         # 스레드 안전을 위한 락
         self.lock = threading.Lock()
 
-        print(f"🔧 실시간 학습 시스템 초기화")
+        print("Real-Time Multimodal Learning System")
+        print("=" * 60)
         print(f"   디바이스: {self.device}")
         print(f"   버퍼 크기: {buffer_size}")
         print(f"   업데이트 주기: {update_frequency}")
@@ -310,7 +311,7 @@ class OnlineMultimodalLearner:
 
     def _handle_concept_drift(self):
         """컨셉 드리프트 처리"""
-        print("🔄 컨셉 드리프트 탐지됨 - 모델 재초기화")
+        print("컨셉 드리프트 탐지됨 - 모델 재초기화")
 
         # 학습률 증가
         self.learning_rate *= 1.5
@@ -372,14 +373,14 @@ class OnlineMultimodalLearner:
 
         # 성능이 크게 저하된 경우
         if recent_avg > overall_avg * (1 + self.alert_threshold):
-            print(f"⚠️ 성능 저하 감지: {recent_avg:.4f} > {overall_avg:.4f}")
+            print(f"성능 저하 감지: {recent_avg:.4f} > {overall_avg:.4f}")
 
             # 자동 복구 시도
             self._attempt_recovery()
 
     def _attempt_recovery(self):
         """성능 복구 시도"""
-        print("🔧 성능 복구 시도 중...")
+        print("성능 복구 시도 중...")
 
         # 학습률 조정
         self.learning_rate *= 0.5
@@ -390,10 +391,6 @@ class OnlineMultimodalLearner:
                 # 가중치에 작은 노이즈 추가
                 noise = torch.randn_like(param) * 0.01
                 param.data += noise
-
-        print(
-            f"🔄 모델 업데이트 #{self.update_count}: Loss={loss.item():.4f}, MSE={mse:.4f}"
-        )
 
     def predict(self, big5_data, cmi_data, rppg_data, voice_data):
         """예측 수행"""
@@ -456,7 +453,7 @@ class OnlineMultimodalLearner:
             },
             filepath,
         )
-        print(f"💾 모델 저장: {filepath}")
+        print(f"모델 저장: {filepath}")
 
     def load_model(self, filepath: str):
         """모델 로드"""
@@ -466,7 +463,7 @@ class OnlineMultimodalLearner:
         self.scalers = checkpoint["scalers"]
         self.performance_history = checkpoint["performance_history"]
         self.update_count = checkpoint["update_count"]
-        print(f"📂 모델 로드: {filepath}")
+        print(f"모델 로드: {filepath}")
 
 
 class RealTimeMultimodalSystem:
@@ -479,21 +476,21 @@ class RealTimeMultimodalSystem:
         self.running = False
         self.worker_thread = None
 
-        print("🚀 실시간 멀티모달 시스템 초기화")
+        print("실시간 멀티모달 시스템 초기화")
 
     def start_learning_loop(self):
         """학습 루프 시작"""
         self.running = True
         self.worker_thread = threading.Thread(target=self._learning_worker)
         self.worker_thread.start()
-        print("🔄 실시간 학습 루프 시작")
+        print("실시간 학습 루프 시작")
 
     def stop_learning_loop(self):
         """학습 루프 중지"""
         self.running = False
         if self.worker_thread:
             self.worker_thread.join()
-        print("⏹️ 실시간 학습 루프 중지")
+        print("실시간 학습 루프 중지")
 
     def _learning_worker(self):
         """학습 워커 스레드"""
@@ -517,7 +514,7 @@ class RealTimeMultimodalSystem:
             except queue.Empty:
                 continue
             except Exception as e:
-                print(f"❌ 학습 워커 오류: {e}")
+                print(f"학습 워커 오류: {e}")
 
     def add_training_data(self, big5_data, cmi_data, rppg_data, voice_data, target):
         """훈련 데이터 추가"""
@@ -552,7 +549,7 @@ class RealTimeMultimodalSystem:
     def create_performance_dashboard(self, save_path: str = "realtime_performance.png"):
         """성능 대시보드 생성"""
         if not self.learner.performance_history:
-            print("❌ 성능 데이터가 없습니다.")
+            print("성능 데이터가 없습니다.")
             return
 
         history_df = pd.DataFrame(self.learner.performance_history)
@@ -625,12 +622,12 @@ class RealTimeMultimodalSystem:
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
         plt.close()
 
-        print(f"📊 성능 대시보드 저장: {save_path}")
+        print(f"성능 대시보드 저장: {save_path}")
 
 
 def simulate_real_time_learning():
     """실시간 학습 시뮬레이션"""
-    print("🎮 실시간 학습 시뮬레이션 시작")
+    print("실시간 학습 시뮬레이션 시작")
     print("=" * 60)
 
     # 시스템 초기화
@@ -641,7 +638,7 @@ def simulate_real_time_learning():
     np.random.seed(42)
     n_samples = 1000
 
-    print(f"📊 {n_samples}개 샘플로 시뮬레이션 시작...")
+    print(f"{n_samples}개 샘플로 시뮬레이션 시작...")
 
     for i in tqdm(range(n_samples)):
         # 시뮬레이션 데이터 생성
@@ -668,7 +665,7 @@ def simulate_real_time_learning():
         # 주기적으로 상태 출력
         if (i + 1) % 100 == 0:
             status = system.get_system_status()
-            print(f"\n📈 진행 상황 ({i+1}/{n_samples}):")
+            print(f"\n진행 상황 ({i+1}/{n_samples}):")
             print(f"   큐 크기: {status['queue_size']}")
             print(f"   버퍼 크기: {status['learner_status']['buffer_size']}")
             print(f"   업데이트 횟수: {status['learner_status']['update_count']}")
@@ -683,7 +680,7 @@ def simulate_real_time_learning():
     system.stop_learning_loop()
 
     # 최종 예측 테스트
-    print("\n🔮 최종 예측 테스트:")
+    print("\n최종 예측 테스트:")
     test_big5 = np.random.normal(3.5, 1.0, 25)
     test_cmi = np.random.normal(50, 15, 10)
     test_rppg = np.random.normal(70, 10, 15)
@@ -693,12 +690,12 @@ def simulate_real_time_learning():
     print(f"   예측값: {prediction:.4f}")
     print(f"   모달리티 가중치: {weights}")
 
-    print("\n🎉 실시간 학습 시뮬레이션 완료!")
+    print("\n실시간 학습 시뮬레이션 완료!")
 
 
 def main():
     """메인 실행 함수"""
-    print("🧠 실시간 멀티모달 학습 시스템")
+    print("실시간 멀티모달 학습 시스템")
     print("=" * 60)
 
     # 실시간 학습 시뮬레이션 실행

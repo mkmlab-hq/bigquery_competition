@@ -1,0 +1,10 @@
+{
+  "training_results": {
+    "best_val_loss": 0.0036938753255526535,
+    "total_epochs": 100,
+    "training_history": [
+      {
+        "epoch": 1,
+        "train_loss": 0.5407493244517934,
+        "val_loss": 0.1764693851582706,
+        "train_rmse": 

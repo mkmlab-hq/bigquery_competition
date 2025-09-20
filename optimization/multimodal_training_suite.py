@@ -66,10 +66,12 @@ class MultimodalTrainingSuite:
         try:
             # advanced_multimodal_training.py 실행
             result = subprocess.run(
-                [sys.executable, "optimization/advanced_multimodal_training.py"],
+                [sys.executable, "f:\\workspace\\bigquery_competition\\optimization\\advanced_multimodal_training.py"],
                 capture_output=True,
                 text=True,
                 timeout=1800,
+                encoding="utf-8",  # Explicitly set encoding to UTF-8
+                errors="replace"  # Replace invalid characters
             )  # 30분 타임아웃
 
             if result.returncode == 0:
@@ -121,10 +123,12 @@ class MultimodalTrainingSuite:
         try:
             # real_time_multimodal_learning.py 실행
             result = subprocess.run(
-                [sys.executable, "optimization/real_time_multimodal_learning.py"],
+                [sys.executable, "f:\\workspace\\bigquery_competition\\optimization\\real_time_multimodal_learning.py"],
                 capture_output=True,
                 text=True,
                 timeout=600,
+                encoding="utf-8",
+                errors="replace"
             )  # 10분 타임아웃
 
             if result.returncode == 0:
@@ -160,10 +164,12 @@ class MultimodalTrainingSuite:
         try:
             # multimodal_performance_optimizer.py 실행
             result = subprocess.run(
-                [sys.executable, "optimization/multimodal_performance_optimizer.py"],
+                [sys.executable, "f:\\workspace\\bigquery_competition\\optimization\\multimodal_performance_optimizer.py"],
                 capture_output=True,
                 text=True,
                 timeout=1800,
+                encoding="utf-8",
+                errors="replace"
             )  # 30분 타임아웃
 
             if result.returncode == 0:
@@ -546,3 +552,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
