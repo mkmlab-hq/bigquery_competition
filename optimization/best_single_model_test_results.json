@@ -1,0 +1,8 @@
+{
+  "best_single_model_test": {
+    "model_type": "ridge_optimized",
+    "test_r2": -0.33618056346114944,
+    "test_rmse": 0.1814832726106035,
+    "test_mae": 0.14797935330257755
+  }
+}

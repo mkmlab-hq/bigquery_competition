@@ -1,0 +1,99 @@
+{
+  "analysis_summary": {
+    "total_modalities": 4,
+    "modality_shapes": {
+      "big5": [
+        10000,
+        50
+      ],
+      "cmi": [
+        10000,
+        39
+      ],
+      "rppg": [
+        10000,
+        37
+      ],
+      "voice": [
+        10000,
+        103
+      ]
+    },
+    "strong_correlations": [],
+    "weak_correlations": [
+      {
+        "pair": "big5_vs_cmi",
+        "correlation": -0.0021869057569210834,
+        "p_value": 0.8269121842698803
+      },
+      {
+        "pair": "big5_vs_rppg",
+        "correlation": -0.013013540909925193,
+        "p_value": 0.1931740906674381
+      },
+      {
+        "pair": "big5_vs_voice",
+        "correlation": 0.003076664472219319,
+        "p_value": 0.7583648679380302
+      },
+      {
+        "pair": "cmi_vs_big5",
+        "correlation": -0.0021869057569210834,
+        "p_value": 0.8269121842698803
+      },
+      {
+        "pair": "cmi_vs_voice",
+        "correlation": 0.08407958207220659,
+        "p_value": 3.7067286547195364e-17
+      },
+      {
+        "pair": "rppg_vs_big5",
+        "correlation": -0.013013540909925193,
+        "p_value": 0.1931740906674381
+      },
+      {
+        "pair": "voice_vs_big5",
+        "correlation": 0.003076664472219319,
+        "p_value": 0.7583648679380302
+      },
+      {
+        "pair": "voice_vs_cmi",
+        "correlation": 0.08407958207220659,
+        "p_value": 3.7067286547195364e-17
+      }
+    ],
+    "pca_variance_explained": [
+      0.9985461422886289,
+      0.0013888004312091343,
+      6.131529326401319e-05,
+      1.42997193989196e-06,
+      9.612240979083673e-07
+    ],
+    "key_insights": [
+      "\ubaa8\ub4e0 \ubaa8\ub2ec\ub9ac\ud2f0 \uac04 \uc0c1\uad00\uad00\uacc4\uac00 \uc57d\ud568",
+      "\uccab \ubc88\uc9f8 \uc8fc\uc131\ubd84\uc774 \ub192\uc740 \ubd84\uc0b0 \uc124\uba85"
+    ]
+  },
+  "modality_shapes": {
+    "big5": [
+      10000,
+      50
+    ],
+    "cmi": [
+      10000,
+      39
+    ],
+    "rppg": [
+      10000,
+      37
+    ],
+    "voice": [
+      10000,
+      103
+    ]
+  },
+  "correlation_summary": {
+    "strong_correlations": 0,
+    "weak_correlations": 8
+  }
+}

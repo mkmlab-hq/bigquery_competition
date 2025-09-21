@@ -1,0 +1,106 @@
+{
+  "overfitting_analysis": {
+    "random_forest": {
+      "cv_mean_r2": 0.9992614977359997,
+      "cv_std_r2": 4.119193988633121e-05,
+      "train_r2": 0.9997726203117009,
+      "val_r2": 0.999326640978798,
+      "test_r2": 0.9993344523849607,
+      "overfitting_gap": 0.0004459793329029127,
+      "generalization_gap": -7.811406162683276e-06,
+      "is_overfitting": false,
+      "is_generalizing": true
+    },
+    "gradient_boosting": {
+      "cv_mean_r2": 0.9996991881549405,
+      "cv_std_r2": 1.3521690348490363e-05,
+      "train_r2": 0.9999048916015233,
+      "val_r2": 0.9997271899638803,
+      "test_r2": 0.9997206081148002,
+      "overfitting_gap": 0.00017770163764296854,
+      "generalization_gap": 6.581849080089519e-06,
+      "is_overfitting": false,
+      "is_generalizing": true
+    },
+    "xgboost": {
+      "cv_mean_r2": 0.9984341001923237,
+      "cv_std_r2": 0.0001457653232349538,
+      "train_r2": 0.9993384790461716,
+      "val_r2": 0.9985922322762535,
+      "test_r2": 0.998442947066052,
+      "overfitting_gap": 0.0007462467699180797,
+      "generalization_gap": 0.00014928521020152186,
+      "is_overfitting": false,
+      "is_generalizing": true
+    },
+    "lightgbm": {
+      "cv_mean_r2": 0.9988919138010404,
+      "cv_std_r2": 0.00011263823061027605,
+      "train_r2": 0.9994598933473672,
+      "val_r2": 0.9989705119374056,
+      "test_r2": 0.9987266893121368,
+      "overfitting_gap": 0.0004893814099615756,
+      "generalization_gap": 0.00024382262526878584,
+      "is_overfitting": false,
+      "is_generalizing": true
+    },
+    "ridge": {
+      "cv_mean_r2": 0.9999859671671132,
+      "cv_std_r2": 7.793189219471085e-07,
+      "train_r2": 0.9999916487324892,
+      "val_r2": 0.9999914142692122,
+      "test_r2": 0.9999913043776648,
+      "overfitting_gap": 2.3446327701570624e-07,
+      "generalization_gap": 1.0989154741736229e-07,
+      "is_overfitting": false,
+      "is_generalizing": true
+    },
+    "elastic_net": {
+      "cv_mean_r2": 0.9938924527699952,
+      "cv_std_r2": 0.00017737836760387863,
+      "train_r2": 0.9939017333134145,
+      "val_r2": 0.9938852741090618,
+      "test_r2": 0.9938574001293765,
+      "overfitting_gap": 1.645920435267012e-05,
+      "generalization_gap": 2.787397968528893e-05,
+      "is_overfitting": false,
+      "is_generalizing": true
+    },
+    "svr": {
+      "cv_mean_r2": 0.9425511163315082,
+      "cv_std_r2": 0.0033344514910001962,
+      "train_r2": 0.9673486888251528,
+      "val_r2": 0.9509997554385202,
+      "test_r2": 0.9448382216137385,
+      "overfitting_gap": 0.01634893338663257,
+      "generalization_gap": 0.006161533824781684,
+      "is_overfitting": false,
+      "is_generalizing": true
+    }
+  },
+  "data_quality": {
+    "n_samples": 10000,
+    "n_features": 229,
+    "feature_ratio": 0.0229,
+    "target_stats": {
+      "mean": 5.332011484008134,
+      "std": 2.492675813285723,
+      "min": 1.0,
+      "max": 10.0,
+      "range": 9.0
+    },
+    "feature_stats": {
+      "mean_std": 0.6119747092441016,
+      "max_std": 0.6119747092441016,
+      "min_std": 0.6119747092441016
+    },
+    "overfitting_risk": "LOW"
+  },
+  "summary": {
+    "total_models": 7,
+    "overfitting_models": 0,
+    "generalizing_models": 7,
+    "avg_overfitting_gap": 0.002603562314955399,
+    "avg_generalization_gap": 0.0009401994249145863
+  }
+}

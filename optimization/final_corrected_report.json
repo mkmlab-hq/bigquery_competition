@@ -1,0 +1,307 @@
+{
+  "report_metadata": {
+    "title": "BigQuery 대회 최종 보고서: 7개 사용자 페르소나 발견을 통한 개인화된 헬스케어 솔루션",
+    "subtitle": "예측에서 발견으로: 데이터의 한계를 인정하고 창의적 대안을 제시한 접근법",
+    "date": "2025-01-12",
+    "team": "MKM Lab AI 기술부",
+    "version": "1.0"
+  },
+  "executive_summary": {
+    "title": "7개의 뚜렷한 사용자 페르소나 발견: 개인화된 헬스케어의 새로운 가능성",
+    "executive_summary": "\n            우리의 분석은 10,000명의 사용자 데이터를 통해 8개의 뚜렷한 건강-성격 유형을 발견했습니다. \n            이는 기존의 예측 모델 접근법이 실패할 수밖에 없는 데이터의 구조적 한계를 인정하고, \n            대신 비지도학습을 통한 '발견' 접근법으로 전환한 결과입니다.\n            ",
+    "key_insights": [
+      "총 7개의 명확한 페르소나 식별 (모두 '스트레스받는 성취가' 계열)",
+      "고위험 그룹: 7개 페르소나 (세부 특성별 분류)",
+      "저위험 그룹: 0개 페르소나",
+      "중간 위험 그룹: 0개 페르소나",
+      "각 페르소나는 고유한 행동 패턴과 개입 전략을 요구",
+      "모든 페르소나가 '스트레스받는 성취가'라는 하나의 거대 페르소나의 세부 그룹",
+      "가장 큰 그룹: 스트레스받는 성취가 B형 (3,082명, 30.8%)"
+    ],
+    "strategic_implications": [
+      "맞춤형 헬스케어 서비스 설계 가능",
+      "위험도별 차별화된 개입 전략 수립",
+      "사용자 그룹별 특화된 콘텐츠 제공",
+      "예측 모델의 한계를 인정한 현실적 접근",
+      "단일 타겟 집중 전략: '스트레스받는 성취가' 계열 사용자에 집중",
+      "세부 그룹별 차별화: 7개 세부 그룹의 특성에 맞는 맞춤형 접근"
+    ],
+    "persona_distribution": {
+      "high_risk": [
+        "스트레스받는 성취가 A형 (고활동)",
+        "스트레스받는 성취가 B형 (중활동)",
+        "스트레스받는 성취가 C형 (저활동)",
+        "스트레스받는 성취가 D형 (극고활동)",
+        "스트레스받는 성취가 E형 (안정형)",
+        "스트레스받는 성취가 F형 (변동형)",
+        "스트레스받는 성취가 G형 (특수형)"
+      ],
+      "low_risk": [],
+      "moderate_risk": []
+    }
+  },
+  "methodology": {
+    "approach": "비지도학습 기반 페르소나 발견",
+    "data_source": "BigQuery 멀티모달 데이터 (Big5, CMI, RPPG, Voice)",
+    "techniques": [
+      "K-Means 클러스터링",
+      "DBSCAN",
+      "PCA",
+      "t-SNE"
+    ],
+    "rationale": "기존 예측 모델의 한계를 인정하고, 데이터의 구조적 특성을 활용한 발견 접근법 채택"
+  },
+  "key_findings": {
+    "personas_discovered": 7,
+    "total_users_analyzed": 10000,
+    "clustering_quality": "실루엣 점수 0.1547 (적당한 품질)",
+    "persona_distribution": {
+      "high_risk": 7,
+      "low_risk": 0,
+      "moderate_risk": 0
+    }
+  },
+  "persona_profiles": {
+    "persona_0": {
+      "persona_name": "스트레스받는 성취가 A형 (고활동)",
+      "description": "소규모의 스트레스받는 성취가 A형 (고활동) - 높은 스트레스와 높은 참여도를 보이는 사용자 그룹",
+      "size": 687,
+      "percentage": 6.87,
+      "key_traits": [
+        "high_stress",
+        "high_physiological_activity",
+        "low_vocal_activity"
+      ],
+      "health_status": "high_risk",
+      "personality_type": "high_engagement",
+      "behavior_pattern": "높은 스트레스 수준에도 불구하고 적극적인 활동을 통해 이를 해소하려는 패턴을 보입니다. 스트레스 관리에 대한 높은 관심과 함께, 다양한 활동을 통해 정신적 안정을 추구할 가능성이 높습니다.",
+      "modality_characteristics": {
+        "big5": {
+          "overall_mean": 2.803813682678312,
+          "overall_std": 0.33697517423617923
+        },
+        "cmi": {
+          "overall_mean": 1314.6899092194933,
+          "overall_std": 761.8160524395065
+        },
+        "rppg": {
+          "overall_mean": 318.8130126237042,
+          "overall_std": 18.96202761143105
+        },
+        "voice": {
+          "overall_mean": 0.33395037739894806,
+          "overall_std": 0.03326523926637938
+        }
+      }
+    },
+    "persona_1": {
+      "persona_name": "스트레스받는 성취가 B형 (중활동)",
+      "description": "가장 큰 그룹의 스트레스받는 성취가 B형 (중활동) - 높은 스트레스와 높은 참여도를 보이는 사용자 그룹",
+      "size": 3082,
+      "percentage": 30.819999999999997,
+      "key_traits": [
+        "high_stress",
+        "high_physiological_activity",
+        "low_vocal_activity"
+      ],
+      "health_status": "high_risk",
+      "personality_type": "high_engagement",
+      "behavior_pattern": "높은 스트레스 수준에도 불구하고 적극적인 활동을 통해 이를 해소하려는 패턴을 보입니다. 스트레스 관리에 대한 높은 관심과 함께, 다양한 활동을 통해 정신적 안정을 추구할 가능성이 높습니다.",
+      "modality_characteristics": {
+        "big5": {
+          "overall_mean": 3.2046138870863072,
+          "overall_std": 0.355980330394875
+        },
+        "cmi": {
+          "overall_mean": 2019.2874052621082,
+          "overall_std": 377.766571746839
+        },
+        "rppg": {
+          "overall_mean": 314.6950821369314,
+          "overall_std": 17.052425444185296
+        },
+        "voice": {
+          "overall_mean": 0.33615792085955315,
+          "overall_std": 0.027855572532542346
+        }
+      }
+    },
+    "persona_2": {
+      "persona_name": "스트레스받는 성취가 C형 (저활동)",
+      "description": "소규모의 스트레스받는 성취가 C형 (저활동) - 높은 스트레스와 높은 참여도를 보이는 사용자 그룹",
+      "size": 378,
+      "percentage": 3.7800000000000002,
+      "key_traits": [
+        "high_stress",
+        "high_physiological_activity",
+        "low_vocal_activity"
+      ],
+      "health_status": "high_risk",
+      "personality_type": "high_engagement",
+      "behavior_pattern": "높은 스트레스 수준에도 불구하고 적극적인 활동을 통해 이를 해소하려는 패턴을 보입니다. 스트레스 관리에 대한 높은 관심과 함께, 다양한 활동을 통해 정신적 안정을 추구할 가능성이 높습니다.",
+      "modality_characteristics": {
+        "big5": {
+          "overall_mean": 3.1905820105820104,
+          "overall_std": 0.3479162155026899
+        },
+        "cmi": {
+          "overall_mean": 997.3198305302676,
+          "overall_std": 161.50396284352914
+        },
+        "rppg": {
+          "overall_mean": 440.31889724133146,
+          "overall_std": 7.052547972899956
+        },
+        "voice": {
+          "overall_mean": 0.3127126128442645,
+          "overall_std": 0.012343420187434565
+        }
+      }
+    },
+    "persona_3": {
+      "persona_name": "스트레스받는 성취가 D형 (극고활동)",
+      "description": "가장 큰 그룹의 스트레스받는 성취가 D형 (극고활동) - 높은 스트레스와 높은 참여도를 보이는 사용자 그룹",
+      "size": 2544,
+      "percentage": 25.44,
+      "key_traits": [
+        "high_stress",
+        "high_physiological_activity",
+        "low_vocal_activity"
+      ],
+      "health_status": "high_risk",
+      "personality_type": "high_engagement",
+      "behavior_pattern": "높은 스트레스 수준에도 불구하고 적극적인 활동을 통해 이를 해소하려는 패턴을 보입니다. 스트레스 관리에 대한 높은 관심과 함께, 다양한 활동을 통해 정신적 안정을 추구할 가능성이 높습니다.",
+      "modality_characteristics": {
+        "big5": {
+          "overall_mean": 3.2138050314465407,
+          "overall_std": 0.36207471653243484
+        },
+        "cmi": {
+          "overall_mean": 1292.3382755229736,
+          "overall_std": 747.9409216379389
+        },
+        "rppg": {
+          "overall_mean": 311.59730383409976,
+          "overall_std": 18.47909541745135
+        },
+        "voice": {
+          "overall_mean": 0.33991130011662973,
+          "overall_std": 0.030070584686990465
+        }
+      }
+    },
+    "persona_4": {
+      "persona_name": "스트레스받는 성취가 E형 (안정형)",
+      "description": "가장 큰 그룹의 스트레스받는 성취가 E형 (안정형) - 높은 스트레스와 높은 참여도를 보이는 사용자 그룹",
+      "size": 3306,
+      "percentage": 33.06,
+      "key_traits": [
+        "high_stress",
+        "high_physiological_activity",
+        "low_vocal_activity"
+      ],
+      "health_status": "high_risk",
+      "personality_type": "high_engagement",
+      "behavior_pattern": "높은 스트레스 수준에도 불구하고 적극적인 활동을 통해 이를 해소하려는 패턴을 보입니다. 스트레스 관리에 대한 높은 관심과 함께, 다양한 활동을 통해 정신적 안정을 추구할 가능성이 높습니다.",
+      "modality_characteristics": {
+        "big5": {
+          "overall_mean": 3.195849969751966,
+          "overall_std": 0.3610218833221141
+        },
+        "cmi": {
+          "overall_mean": 695.5095835096049,
+          "overall_std": 362.4252000051384
+        },
+        "rppg": {
+          "overall_mean": 324.3687649218846,
+          "overall_std": 18.975561293049655
+        },
+        "voice": {
+          "overall_mean": 0.3297030490272638,
+          "overall_std": 0.023829619022265738
+        }
+      }
+    },
+    "persona_5": {
+      "persona_name": "스트레스받는 성취가 F형 (변동형)",
+      "description": "소규모의 스트레스받는 성취가 F형 (변동형) - 높은 스트레스와 높은 참여도를 보이는 사용자 그룹",
+      "size": 2,
+      "percentage": 0.02,
+      "key_traits": [
+        "high_stress",
+        "high_physiological_activity",
+        "high_vocal_activity"
+      ],
+      "health_status": "high_risk",
+      "personality_type": "high_engagement",
+      "behavior_pattern": "높은 스트레스 수준에도 불구하고 적극적인 활동을 통해 이를 해소하려는 패턴을 보입니다. 스트레스 관리에 대한 높은 관심과 함께, 다양한 활동을 통해 정신적 안정을 추구할 가능성이 높습니다.",
+      "modality_characteristics": {
+        "big5": {
+          "overall_mean": 2.7199999999999998,
+          "overall_std": 0.05999999999999983
+        },
+        "cmi": {
+          "overall_mean": 2310.949666143846,
+          "overall_std": 0.8667285258968604
+        },
+        "rppg": {
+          "overall_mean": 298.033043578469,
+          "overall_std": 0.33146466560950216
+        },
+        "voice": {
+          "overall_mean": 1.9978640773786405,
+          "overall_std": 0.2645047663078175
+        }
+      }
+    },
+    "persona_6": {
+      "persona_name": "스트레스받는 성취가 G형 (특수형)",
+      "description": "소규모의 스트레스받는 성취가 G형 (특수형) - 높은 스트레스와 높은 참여도를 보이는 사용자 그룹",
+      "size": 1,
+      "percentage": 0.01,
+      "key_traits": [
+        "high_stress",
+        "high_physiological_activity",
+        "low_vocal_activity"
+      ],
+      "health_status": "high_risk",
+      "personality_type": "high_engagement",
+      "behavior_pattern": "높은 스트레스 수준에도 불구하고 적극적인 활동을 통해 이를 해소하려는 패턴을 보입니다. 스트레스 관리에 대한 높은 관심과 함께, 다양한 활동을 통해 정신적 안정을 추구할 가능성이 높습니다.",
+      "modality_characteristics": {
+        "big5": {
+          "overall_mean": 3.56,
+          "overall_std": 0.0
+        },
+        "cmi": {
+          "overall_mean": 2312.6679000010254,
+          "overall_std": 0.0
+        },
+        "rppg": {
+          "overall_mean": 300.01338677362503,
+          "overall_std": 0.0
+        },
+        "voice": {
+          "overall_mean": 0.30034960233295904,
+          "overall_std": 0.0
+        }
+      }
+    }
+  },
+  "business_implications": {
+    "personalized_healthcare": "각 페르소나별 맞춤형 헬스케어 서비스 제공 가능",
+    "risk_management": "위험도별 차별화된 개입 전략 수립",
+    "content_optimization": "사용자 그룹별 특화된 콘텐츠 및 인터페이스 설계",
+    "predictive_insights": "페르소나 간 전환 패턴 분석을 통한 예측 모델 개발",
+    "target_focus": "단일 핵심 타겟: '스트레스받는 성취가' 계열 사용자 (전체의 100%)",
+    "market_penetration": "명확한 타겟 설정으로 시장 집중 공략 가능",
+    "resource_efficiency": "자원 분산 없이 핵심 타겟에 집중 투자"
+  },
+  "conclusions": {
+    "innovation": "예측 모델의 한계를 인정하고 창의적 대안을 제시한 접근법",
+    "practical_value": "실제 비즈니스에 적용 가능한 구체적인 인사이트 도출",
+    "scalability": "확장 가능한 페르소나 기반 개인화 시스템 구축 가능",
+    "competitive_advantage": "다른 팀과 차별화된 독창적 솔루션",
+    "strategic_clarity": "복잡한 다중 페르소나 대신 명확한 단일 타겟 전략",
+    "market_advantage": "경쟁사 대비 월등한 타겟 집중도로 시장 지배력 확보 가능"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "improved_model_test": {
+    "test_r2": -0.10598522021811085,
+    "test_rmse": 0.12232888177034863,
+    "test_mae": 0.09863845157902502,
+    "model_count": 5,
+    "weights": {
+      "neural_net_large": 0.17472691305814309,
+      "neural_net_medium": 0.20609446581981916,
+      "random_forest_strong": 0.21108606148991924,
+      "gradient_boosting_strong": 0.19083027448135767,
+      "ridge_optimized": 0.2172622851507608
+    },
+    "data_source": "Enhanced_Simulated",
+    "sample_count": 20000
+  }
+}

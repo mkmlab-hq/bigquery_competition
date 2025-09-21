@@ -76,3 +76,5 @@ if __name__ == "__main__":
     print(f"Attention shape: {attention.shape}")
     print("✅ Cross-Modal Attention 완료!")
 
+
+

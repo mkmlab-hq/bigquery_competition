@@ -1,0 +1,39 @@
+{
+  "submission_info": {
+    "team_name": "MKM Lab AI 기술부",
+    "submission_date": "2025-01-12",
+    "approach": "예측에서 발견으로 - 페르소나 기반 솔루션",
+    "version": "1.0"
+  },
+  "key_findings": {
+    "personas_discovered": 7,
+    "total_users_analyzed": 10000,
+    "main_persona": "스트레스받는 성취가 (The Stressed Achiever)",
+    "clustering_method": "K-Means + DBSCAN",
+    "data_sources": [
+      "Big5",
+      "CMI",
+      "RPPG",
+      "Voice"
+    ]
+  },
+  "strategic_insights": {
+    "single_target_strategy": "모든 페르소나가 하나의 거대 페르소나로 통합",
+    "business_value": "명확한 타겟 설정으로 시장 집중 공략 가능",
+    "competitive_advantage": "다른 팀과 차별화된 독창적 접근법"
+  },
+  "files_included": [
+    "final_report.json",
+    "persona_discovery_operation.py",
+    "simplified_insight_finalization.py",
+    "final_report_corrections.py",
+    "README.md",
+    "submission_summary.json"
+  ],
+  "execution_instructions": [
+    "1. BigQuery 인증 설정",
+    "2. persona_discovery_operation.py 실행",
+    "3. simplified_insight_finalization.py 실행",
+    "4. final_report_corrections.py 실행"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "robust_simple_model_test": {
+    "model_type": "linear_regression",
+    "test_r2": -0.33621094274454566,
+    "test_rmse": 0.18148533569271375,
+    "test_mae": 0.1479812779934539
+  }
+}

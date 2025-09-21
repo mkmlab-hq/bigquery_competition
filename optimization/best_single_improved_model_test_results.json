@@ -1,0 +1,9 @@
+{
+  "best_single_improved_model_test": {
+    "model_type": "ridge_weak",
+    "test_r2": -0.26071543819553145,
+    "test_rmse": 0.1306059250871018,
+    "test_mae": 0.10574014841177677,
+    "sample_count": 20000
+  }
+}
